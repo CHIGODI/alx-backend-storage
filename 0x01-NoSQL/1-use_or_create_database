@@ -1,0 +1,3 @@
+// create a mongo db my_db
+
+use my_db

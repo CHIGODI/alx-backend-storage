@@ -1,0 +1,5 @@
+// drops documents in a collection with a given attribute
+
+db.school.deleteMany(
+    {name: "Holberton school"}
+    )
