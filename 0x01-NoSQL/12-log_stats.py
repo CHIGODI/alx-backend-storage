@@ -39,7 +39,7 @@ def nginx_stats():
         print(f'\tmethod {method}: {stat}')
 
     print(f"{db.count_documents({'method': 'GET', 'path': '/status'})}"
-          f"status check")
+          f" status check")
 
 
 if __name__ == '__main__':
