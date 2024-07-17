@@ -43,8 +43,4 @@ class Cache:
                 else the raw data from Redis (bytes).
         """
         data = self._redis.get(key)
-        if data is None:
-            return None
-        if fn is not None:
-            return fn(data)
-        return data
+        return data if not fn else fn(data)
