@@ -4,7 +4,7 @@ This module contains a class Cache that makes connection to redis
 """
 import redis
 import uuid
-from typing import Optional, Callable, Any
+from typing import Optional, Callable, Union
 
 
 class Cache:
@@ -12,7 +12,7 @@ class Cache:
     Cache class to interact with Redis for storing and retrieving data.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize the Cache class.
         Establishes a connection to the Redis server and clears the
@@ -21,7 +21,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
-    def store(self, data: Any) -> str:
+    def store(self, data: Union[str, int, bytes, float]) -> str:
         """
         Method that takes a data argument and returns a string.
         This method generate a random key (using uuid),
@@ -32,8 +32,8 @@ class Cache:
         self._redis.set(key, data)
         return key
 
-    def get(self, key: str, fn: Optional[Callable[[bytes], Any]] = None)\
-            -> Optional[Any]:
+    def get(self, key: str, fn: Optional[Callable] = None)\
+            -> Union[str, int, bytes, float]:
         """
         Retrieve data from Redis using the provided key.
 
@@ -43,4 +43,26 @@ class Cache:
                 else the raw data from Redis (bytes).
         """
         data = self._redis.get(key)
-        return data if not fn else fn(data)
+        if data is None:
+            return None
+        return fn(data) if fn else data
+
+    def get_str(self, key) -> Optional[str]:
+        """
+        Retrieve string data from Redis using the provided key.
+
+        :param key: The key to retrieve string data from Redis.
+        :return: The string data retrieved from Redis, or None
+        if key doesn't exist.
+        """
+        return self.get(key, fn=lambda data: data.decode('utf-8'))
+
+    def get_int(self, key) -> Optional[int]:
+        """
+        Retrieve integer data from Redis using the provided key.
+
+        :param key: The key to retrieve integer data from Redis.
+        :return: The integer data retrieved from Redis, or None
+        if key doesn't exist.
+        """
+        return self.get(key, fn=lambda data: int(data) if data else None)
