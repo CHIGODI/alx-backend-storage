@@ -17,9 +17,6 @@ def cache_count(method: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         """Addds functionailty to method"""
         cache_key: str = args[0]
-        cache_count: str = f'count:{args[0]}'
-        redis.incr(cache_count)
-
         if redis.get(cache_key):
             return redis.get(cache_key).decode('utf-8')
 
@@ -35,6 +32,8 @@ def get_page(url: str) -> str:
     makes a request to the url parsed and returns
     the content in text
     """
+    cache_count: str = f'count:{url}'
+    redis.incr(cache_count)
     return requests.get(url).text
 
 
