@@ -1,34 +1,40 @@
 #!/usr/bin/env python3
+"""Redis Basics"""
 import requests
-import time
 from functools import wraps
-from typing import Dict
+from typing import Callable
+import uuid
+import redis
 
-cache: Dict[str, str] = {}
+redis = redis.Redis()
 
+
+def cache_count(method: Callable):
+    @wraps(method)
+    def wrapper(*args, **kwargs):
+        """Addds functionailty to method"""
+        cache_key = args[0]
+        cache_count = f'count:{args[0]}'
+        redis.incr(cache_count)
+
+        if redis.get(cache_key):
+            return redis.get(cache_key).decode('utf-8')
+
+        result = method(args[0])
+        redis.set(cache_key, result, 10)
+        return method(*args, **kwargs)
+    return wrapper
+
+
+@cache_count
 def get_page(url: str) -> str:
-    if url in cache:
-        print(f"Retrieving from cache: {url}")
-        return cache[url]
-    else:
-        print(f"Retrieving from web: {url}")
-        response = requests.get(url)
-        result = response.text
-        cache[url] = result
-        return result
+    """
+    makes a request to the url parsed and returns
+    the content in text
+    """
+    res = requests.get(url)
+    return res.text
 
-def cache_with_expiration(expiration: int):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            url = args[0]
-            key = f"count:{url}"
-            if key in cache:
-                count, timestamp = cache[key]
-                if time.time() - timestamp > expiration:
-                    result = func(*args, **kwargs)
-                    cache[key] = (count+1, time.time())
-                    return result
-                else:
-                    cache[key] = (count+1, timestamp)
-                    return
+
+if __name__ == '__main__':
+    get_page('https://www.youtube.com')
