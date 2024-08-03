@@ -21,7 +21,7 @@ def cache_count(method: Callable) -> Callable:
             return redis.get(cache_key).decode('utf-8')
 
         result = method(args[0])
-        redis.set(cache_key, result, 10)
+        redis.set(cache_key, str(result), 10)
         return method(*args, **kwargs)
     return wrapper
 
@@ -32,7 +32,7 @@ def get_page(url: str) -> str:
     makes a request to the url parsed and returns
     the content in text
     """
-    return requests.get(url)
+    return requests.get(url).text
 
 
 if __name__ == '__main__':
