@@ -9,12 +9,12 @@ import redis
 redis = redis.Redis()
 
 
-def cache_count(method: Callable):
+def cache_count(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(*args, **kwargs):
         """Addds functionailty to method"""
-        cache_key = args[0]
-        cache_count = f'count:{args[0]}'
+        cache_key: str = args[0]
+        cache_count: str = f'count:{args[0]}'
         redis.incr(cache_count)
 
         if redis.get(cache_key):
@@ -32,8 +32,7 @@ def get_page(url: str) -> str:
     makes a request to the url parsed and returns
     the content in text
     """
-    res = requests.get(url)
-    return res.text
+    return requests.get(url)
 
 
 if __name__ == '__main__':
