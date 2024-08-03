@@ -10,6 +10,9 @@ redis = redis.Redis()
 
 
 def cache_count(method: Callable) -> Callable:
+    """
+    Add counting and caching functionality to method
+    """
     @wraps(method)
     def wrapper(*args, **kwargs):
         """Addds functionailty to method"""
